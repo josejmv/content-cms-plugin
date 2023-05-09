@@ -83,18 +83,15 @@ const CreateModal = ({ article, handleClose }) => {
 
   React.useEffect(() => {
     (async () => {
-      const response = await fetch(
-        "https://be01-186-28-59-1.ngrok-free.app/api/i18n/locales",
-        {
-          method: "GET",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-            Authorization:
-              "Bearer 73d80b1c10c017b85775dd9cab5e98ba24bc53f2b2a63d1a44b1a333d63edaabf9f020ed08b6c74a512c10e677b056c5f27775ae75f5d197f175f603b3400d94486d6a2d24f45713af46cc9b318a3bf70b7eadb017f7304892a5ee21821ea7d082b8f9572ce042d9e2652729822e1c5104d2d0b9926eef7eeb56a67e071b5f0f",
-          },
-        }
-      ).then((res) => res.json());
+      const response = await fetch("http://localhost:1337/api/i18n/locales", {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          Authorization:
+            "Bearer 73d80b1c10c017b85775dd9cab5e98ba24bc53f2b2a63d1a44b1a333d63edaabf9f020ed08b6c74a512c10e677b056c5f27775ae75f5d197f175f603b3400d94486d6a2d24f45713af46cc9b318a3bf70b7eadb017f7304892a5ee21821ea7d082b8f9572ce042d9e2652729822e1c5104d2d0b9926eef7eeb56a67e071b5f0f",
+        },
+      }).then((res) => res.json());
 
       setLanguages(
         response

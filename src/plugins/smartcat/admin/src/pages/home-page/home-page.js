@@ -23,7 +23,7 @@ const HomePage = () => {
   React.useEffect(() => {
     (async () => {
       const response = await fetch(
-        "https://be01-186-28-59-1.ngrok-free.app/api/articles?locale=all",
+        "http://localhost:1337/api/articles?locale=all",
         {
           method: "GET",
           headers: {
