@@ -1,10 +1,10 @@
-'use strict';
+"use strict";
 
 module.exports = ({ strapi }) => ({
-  index(ctx) {
-    ctx.body = strapi
-      .plugin('smartcat')
-      .service('myService')
-      .getWelcomeMessage();
+  async index(ctx) {
+    ctx.body = await strapi
+      .plugin("smartcat")
+      .service("myService")
+      .getProject();
   },
 });

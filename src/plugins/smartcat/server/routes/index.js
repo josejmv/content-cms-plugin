@@ -1,8 +1,8 @@
 module.exports = [
   {
-    method: 'GET',
-    path: '/',
-    handler: 'myController.index',
+    method: "GET",
+    path: "/get-project",
+    handler: "myController.index",
     config: {
       policies: [],
     },

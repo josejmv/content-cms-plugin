@@ -1,5 +1,4 @@
 import React from "react";
-import axios from "axios";
 
 import {
   Loader,
@@ -11,18 +10,14 @@ import {
   MultiSelectNested,
 } from "@strapi/design-system";
 
+import { getProject } from "../../../api/smartcat";
+
 import { ActionButton } from ".";
 
 const CreateModal = ({ article, handleClose }) => {
   const [selectedTranslations, setSelectedTranslations] = React.useState([]);
   const targetLanguages = () => selectedTranslations.join();
   const [languages, setLanguages] = React.useState();
-
-  const getProjectData = {
-    domain: "https://smartcat.com",
-    endpoint: "api/integration/v1/project",
-    projectId: "d05ee031-cee1-49fe-8bc1-60f948082ee0",
-  };
 
   const postDocumentData = {
     domain: "https://smartcat.com",
@@ -50,32 +45,23 @@ const CreateModal = ({ article, handleClose }) => {
     formData.set("file", file, `article-${article.id}.json`);
 
     try {
-      const responseForGetProject = await axios({
-        method: "GET",
-        url: `${getProjectData.domain}/${getProjectData.endpoint}/${getProjectData.projectId}`,
-        headers: {
-          Authorization:
-            "Basic NmU2YzUzNWUtZjUyMi00YWMyLWFlMmEtMmM4YjVkMzliZGFmOjNfM3oxdTRLdzc2dmVpM0w0Vnc3dDdJUjNJYg==",
-        },
-      });
+      // const responseForUploadDocument = await axios({
+      //   method: "POST",
+      //   data: formData,
+      //   url: `${postDocumentData.domain}/${postDocumentData.endpoint}`,
+      //   params: {
+      //     projectId: postDocumentData.projectId,
+      //     targetLanguages: targetLanguages(),
+      //   },
+      //   headers: {
+      //     Authorization:
+      //       "Basic NmU2YzUzNWUtZjUyMi00YWMyLWFlMmEtMmM4YjVkMzliZGFmOjNfM3oxdTRLdzc2dmVpM0w0Vnc3dDdJUjNJYg==",
+      //   },
+      // });
+      // console.log({ responseForUploadDocument });
 
-      console.log({ responseForGetProject });
-
-      const responseForUploadDocument = await axios({
-        method: "POST",
-        data: formData,
-        url: `${postDocumentData.domain}/${postDocumentData.endpoint}`,
-        params: {
-          projectId: postDocumentData.projectId,
-          targetLanguages: targetLanguages(),
-        },
-        headers: {
-          Authorization:
-            "Basic NmU2YzUzNWUtZjUyMi00YWMyLWFlMmEtMmM4YjVkMzliZGFmOjNfM3oxdTRLdzc2dmVpM0w0Vnc3dDdJUjNJYg==",
-        },
-      });
-
-      console.log({ responseForUploadDocument });
+      const res = await getProject();
+      console.log(res);
     } catch (error) {
       console.error(error);
     }
