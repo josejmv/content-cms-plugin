@@ -10,25 +10,23 @@ import {
   MultiSelectNested,
 } from "@strapi/design-system";
 
-import { getProject } from "../../../api/smartcat";
+import { getProject, uploadDocument } from "../../../api/smartcat";
 
 import { ActionButton } from ".";
 
 const CreateModal = ({ article, handleClose }) => {
   const [selectedTranslations, setSelectedTranslations] = React.useState([]);
   const targetLanguages = () => selectedTranslations.join();
+  const [loading, setLoading] = React.useState(false);
   const [languages, setLanguages] = React.useState();
 
-  const postDocumentData = {
-    domain: "https://smartcat.com",
-    endpoint: "api/integration/v1/project/document",
-    projectId: "d05ee031-cee1-49fe-8bc1-60f948082ee0",
-  };
-
+  /**
+   * @description Handle submit form event to create a new translation
+   */
   const handleSubmit = async (ev) => {
     ev.preventDefault();
 
-    const formatedArticle = { ...article.attributes };
+    const formatedArticle = { ...article.attributes, id: article.id };
     delete formatedArticle.locale;
     delete formatedArticle.createdAt;
     delete formatedArticle.updatedAt;
@@ -38,37 +36,31 @@ const CreateModal = ({ article, handleClose }) => {
     const formatedJson = {
       units: Object.values(formatedArticle).map((value) => value),
     };
-    const file = new Blob([JSON.stringify(formatedJson)], {
-      type: "text/plain",
-    });
-    const formData = new FormData();
-    formData.set("file", file, `article-${article.id}.json`);
 
     try {
-      // const responseForUploadDocument = await axios({
-      //   method: "POST",
-      //   data: formData,
-      //   url: `${postDocumentData.domain}/${postDocumentData.endpoint}`,
-      //   params: {
-      //     projectId: postDocumentData.projectId,
-      //     targetLanguages: targetLanguages(),
-      //   },
-      //   headers: {
-      //     Authorization:
-      //       "Basic NmU2YzUzNWUtZjUyMi00YWMyLWFlMmEtMmM4YjVkMzliZGFmOjNfM3oxdTRLdzc2dmVpM0w0Vnc3dDdJUjNJYg==",
-      //   },
-      // });
-      // console.log({ responseForUploadDocument });
+      setLoading(true);
+      const res = await uploadDocument({
+        article: { formatedJson, id: article.id },
+        targetLanguages: targetLanguages(),
+      });
+      setLoading(false);
 
-      const res = await getProject();
       console.log(res);
+
+      handleClose();
     } catch (error) {
       console.error(error);
     }
   };
 
+  /**
+   * @description Fetch project to get target languages and allowed locales
+   */
   React.useEffect(() => {
     (async () => {
+      const res = await getProject();
+      const SMTargetLanguages = res.data.targetLanguages;
+
       const response = await fetch("http://localhost:1337/api/i18n/locales", {
         method: "GET",
         headers: {
@@ -79,14 +71,15 @@ const CreateModal = ({ article, handleClose }) => {
         },
       }).then((res) => res.json());
 
-      setLanguages(
-        response
-          .map((language) => ({
-            label: language.name,
-            value: language.code,
-          }))
-          .filter((language) => language.value !== article.attributes.locale)
-      );
+      const allowedLocales = response
+        .filter((language) => SMTargetLanguages.includes(language.code))
+        .map((language) => ({
+          label: language.name,
+          value: language.code,
+        }))
+        .filter((language) => language.value !== article.attributes.locale);
+
+      setLanguages(allowedLocales);
     })();
   }, []);
 
@@ -127,8 +120,8 @@ const CreateModal = ({ article, handleClose }) => {
       <ModalFooter
         startActions={<ActionButton variant="secondary">Cancel</ActionButton>}
         endActions={
-          <ActionButton submit action={handleSubmit}>
-            Translate
+          <ActionButton submit action={!loading && handleSubmit}>
+            {loading ? "Cargando" : "Translate"}
           </ActionButton>
         }
       />

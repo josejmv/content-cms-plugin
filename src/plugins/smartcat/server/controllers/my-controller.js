@@ -7,4 +7,11 @@ module.exports = ({ strapi }) => ({
       .service("myService")
       .getProject();
   },
+
+  async uploadDocument(ctx) {
+    ctx.body = await strapi
+      .plugin("smartcat")
+      .service("myService")
+      .uploadDocument(ctx);
+  },
 });
