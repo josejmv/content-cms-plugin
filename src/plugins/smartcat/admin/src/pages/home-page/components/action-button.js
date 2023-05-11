@@ -6,10 +6,12 @@ const ActionButton = ({
   action,
   children,
   submit = false,
+  style = undefined,
   variant = "primary",
 }) => {
   return (
     <Button
+      style={style}
       onClick={action}
       variant={variant}
       type={submit ? "submit" : "button"}

@@ -6,55 +6,87 @@
 import React from "react";
 
 import {
+  Icon,
   Layout,
-  Loader,
   ContentLayout,
   BaseHeaderLayout,
+  EmptyStateLayout,
 } from "@strapi/design-system";
+import { LoadingIndicatorPage } from "@strapi/helper-plugin";
+import { Earth } from "@strapi/icons";
 
-import { ArticlesTable } from "./";
+import { SmartcatApi } from "../../api/smartcat";
+
+import { ActionButton, ArticlesTable, TranslationsTable } from "./";
 
 const HomePage = () => {
-  const [articles, setArticles] = React.useState();
+  const [translations, setTranslations] = React.useState();
+  const [showCreate, setShowCreate] = React.useState(false);
+
+  const handleShowCreate = () => {
+    setShowCreate(!showCreate);
+  };
 
   /**
-   * @description Fetch articles
+   * @description Fetch translations
    */
   React.useEffect(() => {
-    (async () => {
-      const response = await fetch(
-        "http://localhost:1337/api/articles?locale=all",
-        {
-          method: "GET",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-            Authorization:
-              "Bearer 73d80b1c10c017b85775dd9cab5e98ba24bc53f2b2a63d1a44b1a333d63edaabf9f020ed08b6c74a512c10e677b056c5f27775ae75f5d197f175f603b3400d94486d6a2d24f45713af46cc9b318a3bf70b7eadb017f7304892a5ee21821ea7d082b8f9572ce042d9e2652729822e1c5104d2d0b9926eef7eeb56a67e071b5f0f",
-          },
-        }
-      ).then((res) => res.json());
+    if (!showCreate) {
+      (async () => {
+        const res = await SmartcatApi.getTranslations();
+        setTranslations(res.translations);
+      })();
+    }
+  }, [showCreate]);
 
-      setArticles(response);
-    })();
-  }, []);
+  if (translations === undefined) return <LoadingIndicatorPage />;
 
   return (
-    <Layout>
-      <BaseHeaderLayout
-        as="h2"
-        title="Smartcat"
-        subtitle="Generate translations of your published content with Smartcat"
-      />
+    <>
+      <Layout>
+        <BaseHeaderLayout
+          as="h2"
+          title="Smartcat"
+          subtitle="Generate translations of your published content with Smartcat"
+        />
 
-      <ContentLayout>
-        {articles === undefined ? (
-          <Loader />
-        ) : (
-          <ArticlesTable articles={articles} />
-        )}
-      </ContentLayout>
-    </Layout>
+        <ContentLayout>
+          {showCreate && (
+            <ArticlesTable
+              translations={translations}
+              handleClose={handleShowCreate}
+            />
+          )}
+          {!showCreate && (
+            <>
+              {translations.length === 0 ? (
+                <EmptyStateLayout
+                  icon={
+                    <Icon
+                      as={Earth}
+                      width={`10rem`}
+                      height={`10rem`}
+                      color="secondary500"
+                    />
+                  }
+                  content="You don't have any translations yet..."
+                  action={
+                    <ActionButton submit action={handleShowCreate}>
+                      Create translation
+                    </ActionButton>
+                  }
+                />
+              ) : (
+                <TranslationsTable
+                  translations={translations}
+                  handleShowCreate={handleShowCreate}
+                />
+              )}
+            </>
+          )}
+        </ContentLayout>
+      </Layout>
+    </>
   );
 };
 

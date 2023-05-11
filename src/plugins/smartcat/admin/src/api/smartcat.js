@@ -1,15 +1,40 @@
-import { request } from "@strapi/helper-plugin"; // puedes revisar si se puede usar axios, aunque tendrias que agregar completamente la URL
+import { request } from "@strapi/helper-plugin";
 
-export const getProject = async () => {
-  const data = await request("/smartcat/get-project", { method: "GET" });
-  return data;
-};
+export const SmartcatApi = {
+  getTranslations: async () => {
+    return await request("/smartcat", { method: "GET" });
+  },
+  saveTranslation: async (props) => {
+    return await request("/smartcat/create", {
+      body: props,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+  },
+  deleteTranslation: async (props) => {
+    return await request("/smartcat/delete", {
+      body: props,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+  },
 
-export const uploadDocument = async (props) => {
-  const data = await request("/smartcat/upload-document", {
-    body: props,
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-  });
-  return data;
+  // external api
+  getProject: async () => {
+    return await request("/smartcat/get-project", { method: "GET" });
+  },
+  uploadDocument: async (props) => {
+    return await request("/smartcat/upload-document", {
+      body: props,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+  },
+  deleteDocument: async (props) => {
+    return await request("/smartcat/delete-document", {
+      body: props,
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+  },
 };

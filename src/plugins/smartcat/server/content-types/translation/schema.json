@@ -1,0 +1,56 @@
+{
+  "kind": "collectionType",
+  "collectionName": "translations",
+  "info": {
+    "singularName": "translation",
+    "pluralName": "translations",
+    "displayName": "Translation"
+  },
+  "options": {
+    "draftAndPublish": false,
+    "comment": ""
+  },
+  "pluginOptions": {
+    "content-manager": {
+      "visible": true
+    },
+    "content-type-builder": {
+      "visible": true
+    }
+  },
+  "attributes": {
+    "sourceLanguage": {
+      "maxLength": 10,
+      "type": "string",
+      "required": true,
+      "configurable": false
+    },
+    "targetLanguage": {
+      "maxLength": 10,
+      "type": "string",
+      "required": true,
+      "configurable": false
+    },
+    "filename": {
+      "type": "string",
+      "required": true,
+      "configurable": false
+    },
+    "articleId": {
+      "type": "string",
+      "required": true,
+      "configurable": false,
+      "column": {
+        "unique": true
+      }
+    },
+    "translationId": {
+      "type": "string",
+      "required": true,
+      "configurable": false,
+      "column": {
+        "unique": true
+      }
+    }
+  }
+}

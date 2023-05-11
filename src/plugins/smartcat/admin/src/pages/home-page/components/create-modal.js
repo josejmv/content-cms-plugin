@@ -4,15 +4,15 @@ import {
   Loader,
   ModalBody,
   Typography,
-  ModalFooter,
   ModalLayout,
   ModalHeader,
+  ModalFooter,
   MultiSelectNested,
 } from "@strapi/design-system";
 
-import { getProject, uploadDocument } from "../../../api/smartcat";
-
 import { ActionButton } from ".";
+
+import { SmartcatApi, i18nApi } from "../../../api";
 
 const CreateModal = ({ article, handleClose }) => {
   const [selectedTranslations, setSelectedTranslations] = React.useState([]);
@@ -26,7 +26,7 @@ const CreateModal = ({ article, handleClose }) => {
   const handleSubmit = async (ev) => {
     ev.preventDefault();
 
-    const formatedArticle = { ...article.attributes, id: article.id };
+    const formatedArticle = { ...article.attributes };
     delete formatedArticle.locale;
     delete formatedArticle.createdAt;
     delete formatedArticle.updatedAt;
@@ -37,20 +37,29 @@ const CreateModal = ({ article, handleClose }) => {
       units: Object.values(formatedArticle).map((value) => value),
     };
 
+    setLoading(true);
+
     try {
-      setLoading(true);
-      const res = await uploadDocument({
-        article: { formatedJson, id: article.id },
+      const [translation] = await SmartcatApi.uploadDocument({
         targetLanguages: targetLanguages(),
+        article: {
+          formatedJson,
+          id: article.id,
+          locale: article.attributes.locale,
+        },
       });
-      setLoading(false);
 
-      console.log(res);
-
+      await SmartcatApi.saveTranslation({
+        ...translation,
+        articleId: `${article.id}`,
+      });
       handleClose();
     } catch (error) {
       console.error(error);
     }
+
+    setLoading(false);
+    handleClose();
   };
 
   /**
@@ -58,41 +67,28 @@ const CreateModal = ({ article, handleClose }) => {
    */
   React.useEffect(() => {
     (async () => {
-      const res = await getProject();
+      const res = await SmartcatApi.getProject();
       const SMTargetLanguages = res.data.targetLanguages;
 
-      const response = await fetch("http://localhost:1337/api/i18n/locales", {
-        method: "GET",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          Authorization:
-            "Bearer 73d80b1c10c017b85775dd9cab5e98ba24bc53f2b2a63d1a44b1a333d63edaabf9f020ed08b6c74a512c10e677b056c5f27775ae75f5d197f175f603b3400d94486d6a2d24f45713af46cc9b318a3bf70b7eadb017f7304892a5ee21821ea7d082b8f9572ce042d9e2652729822e1c5104d2d0b9926eef7eeb56a67e071b5f0f",
-        },
-      }).then((res) => res.json());
+      const locales = await i18nApi.getLocales();
 
-      const allowedLocales = response
+      const allowedLocales = locales
         .filter((language) => SMTargetLanguages.includes(language.code))
         .map((language) => ({
           label: language.name,
           value: language.code,
         }))
-        .filter((language) => language.value !== article.attributes.locale);
+        .filter((language) => language.value !== article.locale);
 
       setLanguages(allowedLocales);
     })();
   }, []);
 
   return (
-    <ModalLayout
-      as="form"
-      labelledBy="title"
-      onClose={handleClose}
-      onSubmit={handleSubmit}
-    >
+    <ModalLayout as="form" labelledBy="title" onClose={handleClose}>
       <ModalHeader>
         <Typography fontWeight="bold" as="h2" id="title">
-          Create translation for <b>{article.attributes.title}</b>
+          Create translation
         </Typography>
       </ModalHeader>
 
@@ -100,10 +96,8 @@ const CreateModal = ({ article, handleClose }) => {
         <Typography fontWeight="bold" as="label" htmlFor="languages" id="title">
           Languages
         </Typography>
-        <br />
-
         {languages === undefined ? (
-          <Loader small />
+          <Loader />
         ) : (
           <MultiSelectNested
             required

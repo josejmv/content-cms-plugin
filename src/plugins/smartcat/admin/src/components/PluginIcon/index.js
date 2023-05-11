@@ -5,8 +5,8 @@
  */
 
 import React from "react";
-import { Globe } from "@strapi/icons";
+import { Earth } from "@strapi/icons";
 
-const PluginIcon = () => <Globe />;
+const PluginIcon = () => <Earth />;
 
 export default PluginIcon;

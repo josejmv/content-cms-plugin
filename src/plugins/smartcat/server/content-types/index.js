@@ -1,3 +1,7 @@
-'use strict';
+"use strict";
 
-module.exports = {};
+const translation = require("./translation");
+
+module.exports = {
+  translation,
+};
